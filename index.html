@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bullet Journal</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="journal">
+  <div class="header">
+    <h1>Bullet Journal</h1>
+    <div class="date-line" id="date-line"></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="daily">Daily<span class="key-hint">1</span></div>
+    <div class="tab" data-tab="weekly">Weekly<span class="key-hint">2</span></div>
+    <div class="tab" data-tab="monthly">Calendar<span class="key-hint">3</span></div>
+    <div class="tab" data-tab="all">All Tasks<span class="key-hint">4</span></div>
+  </div>
+
+  <div class="content">
+
+    <!-- ── Daily ── -->
+    <div id="tab-daily">
+      <ul class="entry-list" id="daily-list"></ul>
+      <form class="add-form" id="daily-form" autocomplete="off">
+        <span class="sym-preview" id="daily-sym">•</span>
+        <input class="text-input" id="daily-input" type="text"
+          placeholder="Task  ·  - note  ·  o event  ·  ! priority" />
+        <button class="add-btn" type="submit">Add</button>
+      </form>
+      <div class="syntax-hint">
+        <span><b>-</b> note</span>
+        <span><b>o</b> event</span>
+        <span><b>!</b> priority</span>
+        <span>click bullet to cycle status</span>
+        <span>double-click text to edit</span>
+      </div>
+    </div>
+
+    <!-- ── Weekly ── -->
+    <div id="tab-weekly" style="display:none">
+      <div class="period-nav">
+        <span class="period-title" id="week-title"></span>
+        <div class="period-arrows">
+          <button class="period-arrow" id="week-prev">←</button>
+          <button class="period-arrow" id="week-next">→</button>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:0">Backlog</div>
+      <div class="backlog-block" id="week-backlog-block">
+        <ul class="entry-list" id="week-backlog-list"></ul>
+      </div>
+      <div class="section-label">Weekly Tasks</div>
+      <ul class="entry-list" id="week-tasks-list"></ul>
+      <form class="add-form" id="week-form" autocomplete="off"
+            style="margin-top:.75rem;border-top:none;padding-top:.5rem;">
+        <span class="sym-preview" id="week-sym">•</span>
+        <input class="text-input" id="week-input" type="text"
+          placeholder="Add a task for this week…" />
+        <button class="add-btn" type="submit">Add</button>
+      </form>
+      <div class="section-label">Daily Log</div>
+      <div id="week-days"></div>
+    </div>
+
+    <!-- ── Calendar (monthly) ── -->
+    <div id="tab-monthly" style="display:none">
+      <div class="period-nav">
+        <span class="period-title" id="month-title"></span>
+        <div class="period-arrows">
+          <button class="period-arrow" id="month-prev">←</button>
+          <button class="period-arrow" id="month-next">→</button>
+        </div>
+      </div>
+      <div class="section-label" style="margin-top:0">Backlog</div>
+      <div class="backlog-block" id="month-backlog-block">
+        <ul class="entry-list" id="month-backlog-list"></ul>
+      </div>
+      <div class="section-label">Calendar Tasks</div>
+      <ul class="entry-list" id="month-tasks-list"></ul>
+      <form class="add-form" id="month-form" autocomplete="off"
+            style="margin-top:.75rem;border-top:none;padding-top:.5rem;">
+        <span class="sym-preview" id="month-sym">•</span>
+        <input class="text-input" id="month-input" type="text"
+          placeholder="Add a task for this month…" />
+        <button class="add-btn" type="submit">Add</button>
+      </form>
+      <div class="section-label">Days</div>
+      <div id="month-days"></div>
+      <div class="show-all-row" id="month-show-all"></div>
+    </div>
+
+    <!-- ── All Tasks ── -->
+    <div id="tab-all" style="display:none">
+      <div class="section-label" style="margin-top:0">Open</div>
+      <ul class="entry-list" id="open-list"></ul>
+      <div class="section-label">Migrated</div>
+      <ul class="entry-list" id="migrated-list"></ul>
+      <div class="section-label">Completed</div>
+      <ul class="entry-list" id="done-list"></ul>
+    </div>
+
+  </div><!-- /.content -->
+
+  <div class="kbd-bar">
+    <div class="kbd-item"><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> switch tabs</div>
+    <div class="kbd-item"><kbd>n</kbd> focus input</div>
+    <div class="kbd-item"><kbd>Esc</kbd> blur</div>
+    <div class="kbd-item"><kbd>⌘Z</kbd> undo delete</div>
+    <div class="kbd-item"><kbd>dbl-click</kbd> edit entry</div>
+    <div class="kbd-item"><kbd>+1</kbd> move to tomorrow</div>
+    <div class="kbd-item"><kbd>drag</kbd> → Calendar Tasks</div>
+  </div>
+</div><!-- /.journal -->
+
+<div class="undo-toast" id="undo-toast">
+  Entry deleted <button class="undo-btn" id="undo-btn">Undo</button>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
