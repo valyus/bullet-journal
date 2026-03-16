@@ -592,7 +592,7 @@ document.getElementById('auth-form').addEventListener('submit', async e => {
   errEl.textContent = '';
 
   const { error } = _authMode === 'signup'
-    ? await _sb.auth.signUp({ email, password })
+    ? await _sb.auth.signUp({ email, password, options: { emailRedirectTo: 'https://valyus.github.io/bullet-journal' } })
     : await _sb.auth.signInWithPassword({ email, password });
 
   if (error) { errEl.textContent = error.message; }
