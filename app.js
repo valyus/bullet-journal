@@ -1,3 +1,9 @@
+// ── Supabase ─────────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://cabggxfehnbkqulpyvra.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_kQIt59GtyktOsDUL8fLA_Q__VjP-vST';
+const _sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let currentUser = null;
+
 // ── State ──────────────────────────────────────────────────────────────────
 let entries     = JSON.parse(localStorage.getItem('bujo') || '[]');
 let weekOffset  = 0;
@@ -7,7 +13,29 @@ let activeTab   = 'daily';
 let undoStack   = [];   // [{entry, idx}, …]  max 10
 let draggedId   = null;
 
-function save() { localStorage.setItem('bujo', JSON.stringify(entries)); }
+function save() {
+  localStorage.setItem('bujo', JSON.stringify(entries));
+  if (currentUser) {
+    clearTimeout(save._t);
+    save._t = setTimeout(syncToSupabase, 600);
+  }
+}
+
+async function syncToSupabase() {
+  await _sb.from('entries').delete().eq('user_id', currentUser.id);
+  if (entries.length) {
+    await _sb.from('entries').insert(entries.map(e => ({ ...e, user_id: currentUser.id })));
+  }
+}
+
+async function loadFromSupabase() {
+  const { data } = await _sb.from('entries').select('*').eq('user_id', currentUser.id);
+  if (data && data.length) {
+    entries = data.map(({ user_id, created_at, ...rest }) => rest);
+    localStorage.setItem('bujo', JSON.stringify(entries));
+  }
+  renderAll();
+}
 
 // ── Date helpers ───────────────────────────────────────────────────────────
 function toKey(d) {
@@ -543,10 +571,57 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'n' || e.key === 'a') { e.preventDefault(); focusActiveInput(); }
 });
 
+// ── Auth UI ────────────────────────────────────────────────────────────────
+let _authMode = 'signin';
+
+document.getElementById('auth-toggle-btn').addEventListener('click', () => {
+  _authMode = _authMode === 'signin' ? 'signup' : 'signin';
+  const isSignup = _authMode === 'signup';
+  document.getElementById('auth-title').textContent  = isSignup ? 'Create Account' : 'Sign In';
+  document.getElementById('auth-submit').textContent = isSignup ? 'Sign Up' : 'Sign In';
+  document.getElementById('auth-toggle-text').textContent = isSignup ? 'Already have an account?' : "Don't have an account?";
+  document.getElementById('auth-toggle-btn').textContent  = isSignup ? 'Sign In' : 'Sign Up';
+  document.getElementById('auth-error').textContent = '';
+});
+
+document.getElementById('auth-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email    = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl    = document.getElementById('auth-error');
+  errEl.textContent = '';
+
+  const { error } = _authMode === 'signup'
+    ? await _sb.auth.signUp({ email, password })
+    : await _sb.auth.signInWithPassword({ email, password });
+
+  if (error) { errEl.textContent = error.message; }
+  else if (_authMode === 'signup') {
+    errEl.style.color = '#27ae60';
+    errEl.textContent = 'Check your email to confirm your account.';
+  }
+});
+
+document.getElementById('logout-btn').addEventListener('click', () => _sb.auth.signOut());
+
 // ── Init ───────────────────────────────────────────────────────────────────
 document.getElementById('date-line').textContent = new Date().toLocaleDateString('en-US', {
   weekday:'long', year:'numeric', month:'long', day:'numeric'
 });
 
-renderAll();
 setupDropZone(document.getElementById('month-tasks-list'), () => monthTaskKey(monthOffset));
+
+_sb.auth.onAuthStateChange((event, session) => {
+  currentUser = session?.user ?? null;
+  if (currentUser) {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('journal-app').style.display = '';
+    document.getElementById('user-email').textContent = currentUser.email;
+    loadFromSupabase();
+  } else {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    document.getElementById('journal-app').style.display = 'none';
+    document.getElementById('user-email').textContent = '';
+    entries = [];
+  }
+});

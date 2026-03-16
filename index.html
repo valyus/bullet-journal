@@ -5,13 +5,94 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bullet Journal</title>
   <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    .auth-overlay {
+      position: fixed; inset: 0;
+      background: #ede8db;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .auth-overlay.hidden { display: none; }
+    .auth-box {
+      background: #fdfaf3;
+      border: 1px solid #cec3a0;
+      padding: 2.5rem 2rem;
+      width: 100%; max-width: 360px;
+      box-shadow: 3px 6px 20px rgba(0,0,0,.12);
+    }
+    .auth-box h2 {
+      font-size: 1.1rem; letter-spacing: .14em;
+      text-transform: uppercase; font-weight: normal;
+      margin-bottom: 1.5rem; font-family: 'Georgia', serif;
+    }
+    .auth-box input {
+      display: block; width: 100%;
+      background: transparent; border: none;
+      border-bottom: 1px solid #ccc;
+      font-family: 'Georgia', serif; font-size: .95rem;
+      padding: .4rem .2rem; color: #1e1e1e;
+      outline: none; margin-bottom: 1rem;
+    }
+    .auth-box input:focus { border-bottom-color: #1e1e1e; }
+    .auth-box button[type="submit"] {
+      width: 100%; background: #1e1e1e; color: #fdfaf3;
+      border: none; padding: .55rem;
+      font-family: 'Georgia', serif; font-size: .85rem;
+      letter-spacing: .06em; cursor: pointer; margin-top: .5rem;
+    }
+    .auth-box button[type="submit"]:hover { background: #444; }
+    .auth-error {
+      font-size: .8rem; color: #c0392b;
+      margin-bottom: .75rem; min-height: 1.2em;
+    }
+    .auth-toggle {
+      margin-top: 1.25rem; font-size: .78rem;
+      color: #aaa; text-align: center; font-family: 'Georgia', serif;
+    }
+    .auth-toggle button {
+      background: none; border: none; cursor: pointer;
+      color: #1e1e1e; font-family: inherit; font-size: inherit;
+      text-decoration: underline; padding: 0;
+    }
+    .logout-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Georgia', serif; font-size: .72rem;
+      letter-spacing: .06em; color: #aaa;
+      text-transform: uppercase; padding: 0;
+      margin-top: .35rem;
+    }
+    .logout-btn:hover { color: #1e1e1e; }
+    .user-email {
+      font-size: .72rem; color: #bbb;
+      margin-top: .2rem; letter-spacing: .04em;
+    }
+  </style>
 </head>
 <body>
 
-<div class="journal">
+<div id="auth-overlay" class="auth-overlay">
+  <div class="auth-box">
+    <h2 id="auth-title">Sign In</h2>
+    <p id="auth-error" class="auth-error"></p>
+    <form id="auth-form">
+      <input type="email" id="auth-email" placeholder="Email" required />
+      <input type="password" id="auth-password" placeholder="Password" required />
+      <button type="submit" id="auth-submit">Sign In</button>
+    </form>
+    <p class="auth-toggle">
+      <span id="auth-toggle-text">Don't have an account?</span>
+      <button type="button" id="auth-toggle-btn">Sign Up</button>
+    </p>
+  </div>
+</div>
+
+<div class="journal" id="journal-app" style="display:none">
   <div class="header">
     <h1>Bullet Journal</h1>
     <div class="date-line" id="date-line"></div>
+    <div class="user-email" id="user-email"></div>
+    <button class="logout-btn" id="logout-btn">Sign out</button>
   </div>
 
   <div class="tabs">
